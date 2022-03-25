@@ -16,7 +16,7 @@ on:
 jobs:
   build:
 
-    runs-on: ${{matrix.os}}
+    runs-on: ubuntu-latest
     strategy: 
       matrix:
         os: [ubuntu-latest,windows-latest,macOs-latest]
@@ -24,13 +24,18 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
-    - name: Set up JDK 1.8
-      uses: actions/setup-java@v1
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
       with:
-        java-version: '1.8'
+        java-version: '11'
+        distribution: 'temurin'
 
-    - name: Grate execute permissions for gradlew
-      run: chmod +x gradlew
+    - name: Build with Gradle
+      uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
+      with:
+        arguments: build
+    # - name: Grate execute permissions for gradlew
+    #   run: chmod +x gradlew
 
-    - name: Build with Grade  
-      run: ./gradlew build
+    # - name: Build with Grade  
+    #   run: ./gradlew
