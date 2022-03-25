@@ -14,8 +14,8 @@ on:
     branches: [ master ]
 
 env: 
-  DOCKER_USER: ${{ secrets.DOCKER_USER }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}    
+  DOCKER_USER: ${{ secrets.DOCKER_HUB_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_HUB_PASSWORD }}    
   REPO_NAME: ${{ secrets.REPO_NAME }}
 
 jobs:
@@ -31,11 +31,31 @@ jobs:
       with:
         java-version: '11'
         distribution: 'temurin'
+    
 
     # - name: Build with Gradle
     #   uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
     #   with:
     #     arguments: build
 
-    # - name: Build and push docker image
-    #   uses:     
+    - name: Build and push docker image
+      uses: docker/login-action@v1
+      with: 
+        username: ${{ env.DOCKER_USER }}      
+        password: ${{ env.DOCKER_PASSWORD }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Build and push
+      uses: docker/build-push-action@v2
+      with:
+        context: ./
+        file: ./Dockerfile
+        builder: ${{ steps.buildx.outputs.name }}
+        push: true
+        tags: ${{ env.DOCKER_USER }}/${{ REPO_NAME }}:latest      
+        cache-from: type=registry,ref=${{ env.DOCKER_USER }}/${{ REPO_NAME }}:buildcache
+        cache-to: type=registry,ref=${{ env.DOCKER_USER }}/${{ REPO_NAME }}:buildcache,mode=max
+
+  
